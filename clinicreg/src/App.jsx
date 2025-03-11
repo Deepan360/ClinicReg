@@ -6,6 +6,7 @@ import LandingPage from "./pages/LandingPage";
 import CustomerPage from "./pages/CustomerPage"; // Ensure CustomerPage component is imported
 import NewCustomer from "./pages/NewCustomer";
 import LifetimemembershipPage from "./pages/LifetimemembershipPage";
+import RegMembers from "./pages/RegMembers"; // Ensure RegMembers component is imported
 
 const theme = createTheme({
   palette: {
@@ -49,6 +50,7 @@ const App = () => {
           <Route path="/" element={<LandingPage />} />
           <Route path="/CustomerPage" element={<CustomerPage />} />
           <Route path="/NewCustomer" element={<NewCustomer />} />
+          <Route path="/RegMembers" element={<RegMembers />} />
           <Route
             path="/LifetimemembershipPage"
             element={<LifetimemembershipPage />}
