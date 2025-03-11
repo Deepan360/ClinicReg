@@ -33,7 +33,7 @@ const LandingPage = () => {
             height="100%"
           >
             <img
-              src="/images/labs (2).jpg" // Ensure the image path is correct
+              src="/images/cvr.jpg" // Ensure the image path is correct
               alt="Portrait"
               style={{
                 width: "100%",
@@ -58,7 +58,7 @@ const LandingPage = () => {
                   color="primary"
                   onClick={() => navigate("/CustomerPage")}
                 >
-                  Customer Table
+                  Check Members
                 </Button>
               </Grid>
               <Grid item>
@@ -67,7 +67,7 @@ const LandingPage = () => {
                   color="secondary"
                   onClick={() => navigate("/NewCustomer")}
                 >
-                  Add Customers
+                  Add Member
                 </Button>
               </Grid>
             </Grid>

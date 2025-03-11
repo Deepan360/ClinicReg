@@ -5,31 +5,28 @@ import {
   TextField,
   Typography,
   Box,
+  Button,
   Card,
   Avatar,
   Grid,
   Divider,
-  Link
+  Link,
+  Container,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import PersonIcon from "@mui/icons-material/Person";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle"; // Success icon (tick)
-import CancelIcon from "@mui/icons-material/Cancel"; // Error icon (X)
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
 import "../CustomerPage.css";
 
 const CustomerPage = () => {
+   const navigate = useNavigate();
   const [mobileNumber, setMobileNumber] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState(false);
-  const [customerDetails, setCustomerDetails] = useState({
-    customername: "",
-    mobileno: "",
-    dob: "",
-    gender: "",
-    address: "",
-    city: "",
-    state: "",
-  });
+  const [customerDetails, setCustomerDetails] = useState([]);
 
   useEffect(() => {
     if (/^\d{10}$/.test(mobileNumber)) {
@@ -37,22 +34,14 @@ const CustomerPage = () => {
     } else if (mobileNumber) {
       setMessage("Please enter a valid 10-digit mobile number.");
       setError(true);
-      setCustomerDetails({
-        customername: "",
-        mobileno: "",
-        dob: "",
-        gender: "",
-        address: "",
-        city: "",
-        state: "",
-      });
+      setCustomerDetails([]);
     }
   }, [mobileNumber]);
 
   const checkMobileNumber = async (mobile) => {
     try {
       const response = await axios.get(
-        `http://136.185.14.8:8776/auth/checkMobileNumberavini`,
+        `http://136.185.14.8:8077/auth/checkMobileNumberClinic`,
         { params: { mobileno: mobile } }
       );
 
@@ -60,24 +49,15 @@ const CustomerPage = () => {
         const customerArray = response.data.data;
 
         if (customerArray.length > 0) {
-          const customer = customerArray[0];
-          setCustomerDetails(customer);
-          setMessage(""); // Clear any previous messages
+          setCustomerDetails(customerArray);
+          setMessage("");
           setError(false);
         } else {
-          setCustomerDetails({
-            customername: "",
-            mobileno: "",
-            dob: "",
-            gender: "",
-            address: "",
-            city: "",
-            state: "",
-          });
+          setCustomerDetails([]);
           setMessage(
             "No registered subscription found for this mobile number."
           );
-          setError(true); // Set error to true since no customer is found
+          setError(true);
         }
       } else {
         setMessage("Invalid response format.");
@@ -87,41 +67,80 @@ const CustomerPage = () => {
       console.error("API Error:", error);
       setMessage("Error checking mobile number. Please try again later.");
       setError(true);
-      setCustomerDetails({
-        customername: "",
-        mobileno: "",
-        dob: "",
-        gender: "",
-        address: "",
-        city: "",
-        state: "",
-      });
+      setCustomerDetails([]);
     }
   };
 
+const formatDOB = (dob) => {
+  if (!dob) return "N/A";
+
+  // Check if the dob contains time or is in UTC format
+  const dateObj = new Date(dob);
+
+  if (isNaN(dateObj.getTime())) return "Invalid Date"; // Handle invalid cases
+
+  const day = String(dateObj.getDate()).padStart(2, "0");
+  const month = String(dateObj.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+  const year = dateObj.getFullYear();
+
+  return `${day}-${month}-${year}`;
+};
+
+
+  const calculateAge = (dob) => {
+    if (!dob) return "N/A";
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+    return age;
+  };
+
   return (
-    <>
+    <Container sx={{ display: "block", height: "100vh", width: "100%" }}>
       <Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
         <img
-          src="/images/logo.jpeg"
+          src="/images/sripharmacy.jpg"
           alt="Logo"
-          style={{
-            width: "400px",
-            height: "auto",
-          }}
+          style={{ width: "80px", height: "auto" }}
         />
       </Box>
+       <Button
+          variant="contained"
+          color="secondary"
+          onClick={() => navigate("/CustomerPage")}
+          sx={{ margin: 2 }}
+        >
+          Check Members
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => navigate("/")}
+          sx={{ margin: 2 }}
+        >
+          Home
+        </Button>
       <Box
         sx={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           gap: 4,
-          marginTop: 6,
-          padding: 4,
-          backgroundColor: "#f9f9f9",
+          marginTop: 4,
+          padding: 3,
+          backgroundColor: "#fff",
           borderRadius: "8px",
           boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+          width: "90%",
+          maxWidth: "600px",
+          marginX: "auto",
         }}
       >
         <Box
@@ -132,24 +151,22 @@ const CustomerPage = () => {
             marginBottom: 2,
           }}
         >
-          <Avatar sx={{ bgcolor: "primary.main", width: 64, height: 64 }}>
-            <PersonIcon sx={{ fontSize: 40 }} />
+          <Avatar sx={{ bgcolor: "primary.main", width: 50, height: 50 }}>
+            <PersonIcon sx={{ fontSize: 32 }} />
           </Avatar>
-          <Typography variant="h4" fontWeight="bold">
-            Customer Lookup
+          <Typography variant="h5" fontWeight="bold">
+            Member Lookup
           </Typography>
         </Box>
 
-        {/* Mobile Number Input */}
         <TextField
           label="Enter Mobile Number"
           variant="outlined"
           value={mobileNumber}
           onChange={(e) => {
             const value = e.target.value;
-            // Allow only numeric input and restrict to 10 digits
             if (/^\d{0,10}$/.test(value)) {
-              setMobileNumber(value); // Update state only if the value is valid
+              setMobileNumber(value);
             }
           }}
           error={error}
@@ -157,111 +174,104 @@ const CustomerPage = () => {
           sx={{ width: "100%", maxWidth: 400 }}
         />
 
-        {/* Message */}
-        {message && !error && (
-          <Typography
-            variant="subtitle1"
-            color="success.main"
-            sx={{ marginTop: 2 }}
-          >
-            {message}
-            <CheckCircleIcon
-              sx={{ fontSize: 20, marginLeft: 1 }}
-              color="success"
-            />
-          </Typography>
-        )}
-
-        {/* Error message with icon */}
         {error && message && (
           <Typography
             variant="subtitle1"
             color="error.main"
-            sx={{ marginTop: 2, display: "flex", alignItems: "center" }}
+            sx={{ mt: 2, display: "flex", alignItems: "center" }}
           >
             <CancelIcon sx={{ fontSize: 20, marginRight: 1 }} color="error" />
             {message}
           </Typography>
         )}
 
-        {/* Customer Card */}
-        {customerDetails.customername && (
-          <Card sx={{ width: "100%", maxWidth: 600, marginTop: 4, padding: 3 }}>
-            {/* Subscribed Member Icon with Text */}
-            <Box
-              sx={{ display: "flex", alignItems: "center", marginBottom: 2 }}
-            >
-              <CheckCircleIcon
-                sx={{ fontSize: 20, color: "primary.main", marginRight: 1 }}
-              />
-              <Typography
-                variant="body1"
-                color="primary.main"
-                fontWeight="500px"
+        {customerDetails.length > 0
+          ? customerDetails.map((customer, index) => (
+              <Card
+                key={index}
+                sx={{ width: "100%", marginTop: 3, padding: 3 }}
               >
-                Subscribed Member
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    marginBottom: 2,
+                  }}
+                >
+                  <CheckCircleIcon
+                    sx={{ fontSize: 20, color: "primary.main", marginRight: 1 }}
+                  />
+                  <Typography
+                    variant="body1"
+                    color="primary.main"
+                    fontWeight="500px"
+                  >
+                    Registered Member {index + 1}
+                  </Typography>
+                </Box>
+                <Typography
+                  variant="h5"
+                  fontWeight="bold"
+                  textAlign="center"
+                  sx={{
+                    textTransform: "capitalize",
+                    marginBottom: 2,
+                    color: "primary.main",
+                  }}
+                >
+                  {customer.name}
+                </Typography>
+                <Divider sx={{ marginBottom: 2 }} />
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="body1">
+                      <strong>Mobile:</strong> {customer.mobileno}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="body1">
+                      <strong>DOB:</strong> {formatDOB(customer.dob)}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="body1">
+                      <strong>Age:</strong> {calculateAge(customer.dob)}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="body1">
+                      <strong>Gender:</strong> {customer.gender || "N/A"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography variant="body1">
+                      <strong>Address:</strong> {customer.address}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body1">
+                      <strong>City:</strong> {customer.city}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body1">
+                      <strong>State:</strong> {customer.state}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Card>
+            ))
+          : !error && (
+              <Typography variant="body1" color="textSecondary" sx={{ mt: 2 }}>
+                No customer details found. Please check the mobile number again.
               </Typography>
-            </Box>
-
-            <Typography
-              variant="h5"
-              fontWeight="bold"
-              textAlign="center"
-              sx={{
-                textTransform: "capitalize",
-                marginBottom: 2,
-                color: "primary.main",
-              }}
-            >
-              {customerDetails.customername}
-            </Typography>
-            <Divider sx={{ marginBottom: 2 }} />
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="body1">
-                  <strong>Mobile:</strong> {customerDetails.mobileno}
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="body1">
-                  <strong>DOB:</strong> {customerDetails.dob}
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="body1">
-                  <strong>Gender:</strong> {customerDetails.gender}
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="body1">
-                  <strong>Address:</strong> {customerDetails.address}
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="body1">
-                  <strong>City:</strong> {customerDetails.city}
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="body1">
-                  <strong>State:</strong> {customerDetails.state}
-                </Typography>
-              </Grid>
-            </Grid>
-          </Card>
-        )}
-
-        {/* No customer found message */}
-        {!customerDetails.customername && !error && (
-          <Typography variant="body1" color="textSecondary" sx={{ mt: 2 }}>
-            No customer details found. Please check the mobile number again.
-          </Typography>
-        )}
+            )}
       </Box>
+
       <Typography
         sx={{
           display: "flex",
-          justifyContent:  "center",
+          justifyContent: "center",
           alignItems: "center",
           mt: 2,
           color: "grey",
@@ -272,23 +282,13 @@ const CustomerPage = () => {
           href="https://akilamtechnology.com"
           target="_blank"
           rel="noopener noreferrer"
-          sx={{
-            textDecoration: "none",
-            color: "primary.main",
-            ml: 0.5,
-            "&:hover": { color: "primary.main" },
-          }}
+          sx={{ textDecoration: "none", color: "primary.main", ml: 0.5 }}
         >
           Akilam Technology
         </Link>
-        <FavoriteIcon
-          sx={{
-            color: "primary.main",
-            ml: 0.5,
-          }}
-        />
+        <FavoriteIcon sx={{ color: "primary.main", ml: 0.5 }} />
       </Typography>
-    </>
+    </Container>
   );
 };
 
