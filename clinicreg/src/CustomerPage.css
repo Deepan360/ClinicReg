@@ -1,0 +1,119 @@
+/* Container for the page */
+.page-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    margin-top: 48px;
+    padding: 32px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Logo Styling */
+.page-logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.page-logo img {
+    width: 400px;
+    height: auto;
+}
+
+/* Title Section */
+.title-container {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.title-container .avatar {
+    background-color: #3f51b5;
+    /* Primary color */
+    width: 64px;
+    height: 64px;
+}
+
+.title-container .avatar .MuiSvgIcon-root {
+    font-size: 40px;
+}
+
+/* Customer Lookup Title */
+.page-title {
+    font-weight: bold;
+    font-size: 32px;
+    color: #333;
+}
+
+/* Mobile Number Input */
+.mobile-input {
+    width: 100%;
+    max-width: 400px;
+    margin-top: 16px;
+}
+
+/* Success Message */
+.success-message {
+    margin-top: 16px;
+    color: green;
+    font-size: 16px;
+}
+
+/* Card Styling */
+.customer-card {
+    width: 100%;
+    max-width: 600px;
+    margin-top: 32px;
+    padding: 24px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Customer Name Styling */
+.customer-name {
+    text-align: center;
+    text-transform: capitalize;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 16px;
+}
+
+/* Divider Styling */
+.card-divider {
+    margin-bottom: 16px;
+}
+
+/* Customer Details Section */
+.customer-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.customer-details .customer-detail {
+    font-size: 16px;
+    color: #555;
+}
+
+.customer-details .customer-detail strong {
+    font-weight: bold;
+}
+
+/* No customer found message */
+.no-customer-message {
+    font-size: 16px;
+    color: #888;
+    margin-top: 16px;
+}
+
+/* Error Message */
+.error-message {
+    font-size: 16px;
+    color: red;
+    margin-top: 16px;
+}
