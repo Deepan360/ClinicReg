@@ -10,11 +10,11 @@ import LifetimemembershipPage from "./pages/LifetimemembershipPage";
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#e5097f",
+      main: "#1e72a9",
     },
     secondary: {
-      main: "#727271",
-      contrastText: "#e5097f",
+      main: "#e02276",
+      contrastText: "#fff",
     },
   },
   typography: {

@@ -124,7 +124,7 @@ useEffect(() => {
         setOpenSnackbar(true);
 
         // Construct a personalized WhatsApp message
-        const message = `Hello ${formData.customername},\n\nWelcome to our lifetime discount program! \n\n🎉Your registration is successful.\n\nEnjoy 15% discount on all our General Services across Avini Labs.`;
+        const message = `Hello ${formData.customername},\n\nWelcome to our lifetime discount program! \n\n🎉Your registration is successful.\n\nEnjoy 15% discount on all our General Services across Sri Clinic.`;
 
         // Send WhatsApp message via Axios
         await axios.post("https://wav5.algotechnosoft.com/api/send", {
