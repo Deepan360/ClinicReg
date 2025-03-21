@@ -12,6 +12,7 @@ import {
   Divider,
   Link,
   Container,
+  IconButton,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
@@ -19,7 +20,11 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import PersonIcon from "@mui/icons-material/Person";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
-import "../CustomerPage.css";
+import "../CustomerPage.css"; 
+import {  AppRegistrationTwoTone } from "@mui/icons-material";
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
+
+
 
 const CustomerPage = () => {
    const navigate = useNavigate();
@@ -102,6 +107,58 @@ const formatDOB = (dob) => {
     return age;
   };
 
+
+const [openDialog, setOpenDialog] = useState(false);
+const [selectedCustomer, setSelectedCustomer] = useState(null);
+
+const handleIconClick = (customer) => {
+  setSelectedCustomer(customer);
+  setOpenDialog(true);
+};
+
+const handleCloseDialog = () => {
+  setOpenDialog(false);
+  setSelectedCustomer(null);
+};
+
+const handleConfirmRegistration = async () => {
+  if (!selectedCustomer) return;
+
+  try {
+    const response = await axios.post(
+      `http://136.185.14.8:8077/auth/todayregistration`,
+      { customerDetails: selectedCustomer }
+    );
+
+    if (response.data && response.data.success) {
+      setMessage("Customer registered successfully.");
+      setError(false);
+    } else {
+      setMessage("Failed to register customer.");
+      setError(true);
+    }
+  } catch (error) {
+    console.error("API Error:", error);
+    setMessage("Error registering customer. Please try again later.");
+    setError(true);
+  } finally {
+    handleCloseDialog();
+  }
+};
+
+
+
+
+  const handleCheckMembers = async () => {
+    if (/^\d{10}$/.test(mobileNumber)) {
+      await checkMobileNumber(mobileNumber);
+    } else {
+      setMessage("Please enter a valid 10-digit mobile number.");
+      setError(true);
+      setCustomerDetails([]);
+    }
+  };
+
   return (
     <Container sx={{ display: "block", height: "100vh", width: "100%" }}>
       <Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
@@ -111,22 +168,22 @@ const formatDOB = (dob) => {
           style={{ width: "80px", height: "auto" }}
         />
       </Box>
-       <Button
-          variant="contained"
-          color="secondary"
-          onClick={() => navigate("/CustomerPage")}
-          sx={{ margin: 2 }}
-        >
-          Check Members
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => navigate("/")}
-          sx={{ margin: 2 }}
-        >
-          Home
-        </Button>
+      <Button
+        variant="contained"
+        color="secondary"
+        onClick={handleCheckMembers}
+        sx={{ margin: 2 }}
+      >
+        Check Members
+      </Button>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => navigate("/")}
+        sx={{ margin: 2 }}
+      >
+        Home
+      </Button>
       <Box
         sx={{
           display: "flex",
@@ -208,6 +265,16 @@ const formatDOB = (dob) => {
                   >
                     Registered Member {index + 1}
                   </Typography>
+                  <IconButton
+                    sx={{
+                      marginLeft: "auto",
+                      zIndex: 1,
+                      boxShadow: "0px 4px 15px 0px rgba(0,0,0,0.3)",
+                    }}
+                    onAbort={() => handleIconClick(customerDetails)}
+                  >
+                    <AppRegistrationTwoTone color="success" />
+                  </IconButton>
                 </Box>
                 <Typography
                   variant="h5"
@@ -288,6 +355,24 @@ const formatDOB = (dob) => {
         </Link>
         <FavoriteIcon sx={{ color: "primary.main", ml: 0.5 }} />
       </Typography>
+
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>Confirm Registration</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to register this customer?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmRegistration} color="primary">
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/* Rest of your component JSX */}
     </Container>
   );
 };

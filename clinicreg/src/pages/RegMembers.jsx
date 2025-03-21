@@ -43,7 +43,6 @@ const fetchCustomers = async () => {
   }
 };
 
-
   // Handle delete
   const handleDelete = async (regid) => {
     if (window.confirm("Are you sure you want to delete this customer?")) {

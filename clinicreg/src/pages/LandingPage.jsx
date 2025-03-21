@@ -15,7 +15,6 @@ const LandingPage = () => {
       minHeight="100vh"
       bgcolor="#fff"
       padding={0}
-      
     >
       <Grid
         container
