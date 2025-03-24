@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-unused-vars
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useCallback } from "react";
 import axios from "axios";
 import {
   TextField,
@@ -13,9 +13,12 @@ import {
   Link,
   Container,
   IconButton,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import PersonIcon from "@mui/icons-material/Person";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -23,8 +26,6 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import "../CustomerPage.css"; 
 import {  AppRegistrationTwoTone } from "@mui/icons-material";
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
-
-
 
 const CustomerPage = () => {
    const navigate = useNavigate();
@@ -55,6 +56,7 @@ const CustomerPage = () => {
 
         if (customerArray.length > 0) {
           setCustomerDetails(customerArray);
+          console.log("Customer Data:", response.data.data);
           setMessage("");
           setError(false);
         } else {
@@ -91,7 +93,6 @@ const formatDOB = (dob) => {
   return `${day}-${month}-${year}`;
 };
 
-
   const calculateAge = (dob) => {
     if (!dob) return "N/A";
     const birthDate = new Date(dob);
@@ -107,31 +108,49 @@ const formatDOB = (dob) => {
     return age;
   };
 
+const [reason, setReason] = useState("");
+const [selectedDoctor, setSelectedDoctor] = useState("");
 
 const [openDialog, setOpenDialog] = useState(false);
 const [selectedCustomer, setSelectedCustomer] = useState(null);
 
 const handleIconClick = (customer) => {
+  console.log("Selected Customer:", customer);
   setSelectedCustomer(customer);
   setOpenDialog(true);
 };
 
+
 const handleCloseDialog = () => {
   setOpenDialog(false);
   setSelectedCustomer(null);
+  setReason("");
+  setSelectedDoctor("");
 };
 
 const handleConfirmRegistration = async () => {
-  if (!selectedCustomer) return;
+  if (!selectedCustomer || !reason || !selectedDoctor) {
+    setMessage("Please fill in all fields.");
+    setError(true);
+    return;
+  }
 
   try {
     const response = await axios.post(
-      `http://136.185.14.8:8077/auth/todayregistration`,
-      { customerDetails: selectedCustomer }
+      `http://localhost:5000/auth/visitEntry`,
+      {
+        customerId: selectedCustomer.id,
+        reason,
+        doctorName: selectedDoctor,
+      }
     );
-
     if (response.data && response.data.success) {
       setMessage("Customer registered successfully.");
+      setError(false);
+      setReason("");
+      setSelectedDoctor("");
+      setMobileNumber("");
+      setCustomerDetails([]);
       setError(false);
     } else {
       setMessage("Failed to register customer.");
@@ -145,10 +164,6 @@ const handleConfirmRegistration = async () => {
     handleCloseDialog();
   }
 };
-
-
-
-
   const handleCheckMembers = async () => {
     if (/^\d{10}$/.test(mobileNumber)) {
       await checkMobileNumber(mobileNumber);
@@ -158,6 +173,8 @@ const handleConfirmRegistration = async () => {
       setCustomerDetails([]);
     }
   };
+
+  const isMobile = window.innerWidth <= 768;
 
   return (
     <Container sx={{ display: "block", height: "100vh", width: "100%" }}>
@@ -201,6 +218,7 @@ const handleConfirmRegistration = async () => {
         }}
       >
         <Box
+          fullWidth
           sx={{
             display: "flex",
             alignItems: "center",
@@ -215,7 +233,6 @@ const handleConfirmRegistration = async () => {
             Member Lookup
           </Typography>
         </Box>
-
         <TextField
           label="Enter Mobile Number"
           variant="outlined"
@@ -230,7 +247,6 @@ const handleConfirmRegistration = async () => {
           helperText={error ? message : ""}
           sx={{ width: "100%", maxWidth: 400 }}
         />
-
         {error && message && (
           <Typography
             variant="subtitle1"
@@ -241,12 +257,22 @@ const handleConfirmRegistration = async () => {
             {message}
           </Typography>
         )}
-
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: isMobile ? "column" : "row",
+          gap: 3,
+          mt: 3,
+          justifyContent: isMobile ? "center" : "start",
+          flexWrap: isMobile ? "nowrap" : "wrap",
+        }}
+      >
         {customerDetails.length > 0
           ? customerDetails.map((customer, index) => (
               <Card
                 key={index}
-                sx={{ width: "100%", marginTop: 3, padding: 3 }}
+                sx={{ width:isMobile ? "350px" : "500px", marginTop: 3, padding: 3 }}
               >
                 <Box
                   sx={{
@@ -271,7 +297,7 @@ const handleConfirmRegistration = async () => {
                       zIndex: 1,
                       boxShadow: "0px 4px 15px 0px rgba(0,0,0,0.3)",
                     }}
-                    onAbort={() => handleIconClick(customerDetails)}
+                    onClick={() => handleIconClick(customer)}
                   >
                     <AppRegistrationTwoTone color="success" />
                   </IconButton>
@@ -334,7 +360,6 @@ const handleConfirmRegistration = async () => {
               </Typography>
             )}
       </Box>
-
       <Typography
         sx={{
           display: "flex",
@@ -356,12 +381,32 @@ const handleConfirmRegistration = async () => {
         <FavoriteIcon sx={{ color: "primary.main", ml: 0.5 }} />
       </Typography>
 
-      <Dialog open={openDialog} onClose={handleCloseDialog}>
+      <Dialog open={openDialog} onClose={handleCloseDialog} zIndex={1500}>
         <DialogTitle>Confirm Registration</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to register this customer?
+            Are you sure you want to register this Patient Entry?
           </DialogContentText>
+          {/* Reason for Visit Input */}
+          <TextField
+            fullWidth
+            label="Reason for Visit"
+            variant="outlined"
+            margin="dense"
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+          />
+          <FormControl fullWidth margin="dense" variant="outlined">
+            <InputLabel>Select Doctor</InputLabel>
+            <Select
+              value={selectedDoctor}
+              onChange={(e) => setSelectedDoctor(e.target.value)}
+              label="Select Doctor"
+            >
+              <MenuItem value="Dr. Keshava Balaji">Dr. Keshava Balaji</MenuItem>
+              <MenuItem value="Dr. Remughi">Dr. Remughi</MenuItem>
+            </Select>
+          </FormControl>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog} color="secondary">
@@ -372,7 +417,6 @@ const handleConfirmRegistration = async () => {
           </Button>
         </DialogActions>
       </Dialog>
-      {/* Rest of your component JSX */}
     </Container>
   );
 };
