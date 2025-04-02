@@ -120,7 +120,6 @@ const handleIconClick = (customer) => {
   setOpenDialog(true);
 };
 
-
 const handleCloseDialog = () => {
   setOpenDialog(false);
   setSelectedCustomer(null);
